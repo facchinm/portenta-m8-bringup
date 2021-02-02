@@ -1,0 +1,8 @@
+#!/bin/bash
+
+# GPIO11 is PWR_ON and according to SARA datasheet should be held low for between 0.15 and 3.2s to power up the modem.
+# In addition according to the datasheet the modem will power down if power is on (PWR_ON is high) and then PWR_ON is held low for more than 1.5s
+
+echo 0 >/sys/class/gpio/gpio11/value
+sleep 4
+echo 1 >/sys/class/gpio/gpio11/value

@@ -1,0 +1,13 @@
+#!/bin/bash
+
+echo 1 > /sys/class/gpio/export
+echo 13 > /sys/class/gpio/export
+echo 14 > /sys/class/gpio/export
+
+echo out > /sys/class/gpio/gpio1/direction
+echo out > /sys/class/gpio/gpio13/direction
+echo out > /sys/class/gpio/gpio14/direction
+
+echo 1 > /sys/class/gpio/gpio1/value
+echo 0 > /sys/class/gpio/gpio13/value
+echo 1 > /sys/class/gpio/gpio14/value

@@ -1,0 +1,19 @@
+#!/bin/bash
+
+# Modem configuration
+
+APN="mobile.vodafone.it"
+
+systemctl disable ModemManager
+systemctl stop ModemManager
+sleep 1
+nmcli d
+sleep 1
+nmcli c
+sleep 1
+nmcli c add type gsm ifname cdc-wdm0 con-name wwan0 apn $APN
+sleep 1
+systemctl start ModemManager
+echo "Modem configured with apn=$APN"
+echo "You can now monitor con. status with command #nmcli d"
+
