@@ -6,7 +6,21 @@
 # Python 3.8.5
 # pyserial-3.4
 # lora modem fw 1.2.1
-# lora gateway 
+# lora gateway Multi-channel DIY gateway Raspberry Pi with IMST iC880A GP 901 C
+#
+# Test description:
+# the program tries to join an existing lora network formed by the gateway + our modem, then
+# tries to send a simple hello message.
+# Data is then verified on the cloud (https://console.thethingsnetwork.org) going into devices page
+# and then data page.
+# NOTE1: modem programming procedure performed using Portenta-H7 and firmware
+# - MKRWAN library version 3603a6
+# - ./examples/MKRWANFWUpdate_standalone/MKRWANFWUpdate_standalone.ino
+# NOTE2: device registration done using Portenta-H7 and firmware
+# - MKRWAN library version 3603a6
+# - ./examples/FirstConfiguration/FirstConfiguration.ino
+#
+# Created by Massimo Pennazio maxipenna@libero.it 2021
 
 import logging
 import serial
@@ -82,6 +96,22 @@ class modemLora(ATProtocol):
         elif event.startswith('+OK=') and self._awaiting_response_for.startswith('AT+DEVEUI?'):
             resp = event[4:4 + 5]
             self.event_responses.put(resp.encode())
+        elif event.startswith('+OK') and self._awaiting_response_for.startswith('AT+BAND='):
+            self.event_responses.put(event.encode())
+        elif event.startswith('+OK') and self._awaiting_response_for.startswith('AT+MODE='):
+            self.event_responses.put(event.encode())
+        elif event.startswith('+OK') and self._awaiting_response_for.startswith('AT+APPEUI='):
+            self.event_responses.put(event.encode())
+        elif event.startswith('+OK') and self._awaiting_response_for.startswith('AT+APPKEY='):
+            self.event_responses.put(event.encode())
+        elif event.startswith('+ACK') and self._awaiting_response_for.startswith('AT+JOIN'):
+            logging.debug("Received +ACK")
+        elif event.startswith('+EVENT=1,1') and self._awaiting_response_for.startswith('AT+JOIN'):
+            self.event_responses.put(event.encode())
+        elif event.startswith('+OK') and self._awaiting_response_for.startswith('AT+CTX'):
+            self.event_responses.put(event.encode())
+        elif event.startswith('+OK') and self._awaiting_response_for.startswith('AT+UTX'):
+            self.event_responses.put(event.encode())
         elif event.startswith('+ERR'):
             logging.error("Modem error!")
             self.event_responses.put(event.encode())
@@ -91,7 +121,6 @@ class modemLora(ATProtocol):
             self.event_responses.put(mac)
         else:
             logging.warning('unhandled event: {!r}'.format(event))
-            self.event_responses.put(event.encode()) # If we don't put we fall into timeout error on self.event_responses.get()
 
     def command_with_event_response(self, command, timeout=5):
         """Send a command that responds with '+...' line"""
@@ -139,7 +168,14 @@ class modemLora(ATProtocol):
         if devEui is not None:
             print("Changing property %s to %s: %s" % ("DEV_EUI", devEui, self.changeProperty("DEV_EUI", devEui)))
         print("Joining...")
-        print("%s" % self.join(60)) # Timeout of 1 minute to connect
+        print("%s" % self.join(60)) # Timeout of 5 minutes to connect
+
+    def send(self, msg, confirmed):
+        buff = str(len(msg)) + '\r' + msg
+        if confirmed:
+            return self.command_with_event_response("AT+CTX " + buff)
+        else:
+            return self.command_with_event_response("AT+UTX " + buff)
 
 ### End class definition
 
@@ -149,8 +185,9 @@ if __name__ == '__main__':
     logging.info("Started script for lora modem testing")
 
     # Obtained during first registration of the device
-    SECRET_APP_EUI=None
-    SECRET_APP_KEY=None 
+    SECRET_DEV_EUI = None
+    SECRET_APP_EUI = None
+    SECRET_APP_KEY = None
 
     ser = serial.Serial()
     ser.baudrate = 19200
@@ -169,4 +206,6 @@ if __name__ == '__main__':
         print("Device EUI: %s" % lora_module.deviceEUI())
         print("Setting band %s: %s" % ("EU868", lora_module.configureBand("EU868")))
         lora_module.joinOTAA(SECRET_APP_EUI, SECRET_APP_KEY)
+        msg = 'Hello Portenta-M8!'
+        print("Sending message %s: %s" % (msg, lora_module.send(msg, True)))
 ### End Main program
