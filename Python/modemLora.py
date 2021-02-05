@@ -138,7 +138,8 @@ class modemLora(ATProtocol):
         print("Changing property %s to %s: %s" % ("APP_KEY", appKey, self.changeProperty("APP_KEY", appKey)))
         if devEui is not None:
             print("Changing property %s to %s: %s" % ("DEV_EUI", devEui, self.changeProperty("DEV_EUI", devEui)))
-        self.join(60) # Timeout of 1 minute to connect
+        print("Joining...")
+        print("%s" % self.join(60)) # Timeout of 1 minute to connect
 
 ### End class definition
 
