@@ -30,17 +30,25 @@ class modemLora(ATProtocol):
 
     def handle_event(self, event):
         """Handle events and command responses starting with '+...'"""
-        if event.startswith('+RRBDRES') and self._awaiting_response_for.startswith('AT+JRBD'):
+        if event.startswith('+OK') and self._awaiting_response_for.startswith('AT'):
+            self.event_responses.put(event.encode())
+        elif event.startswith('+OK=') and self._awaiting_response_for.startswith('AT+DEV?'):
+            self.event_responses.put(event.encode())
+        elif event.startswith('+OK=') and self._awaiting_response_for.startswith('AT+VER?'):
+            self.event_responses.put(event.encode())
+        elif event.startswith('+ERR'):
+            logging.error("Modem error!")
+            self.event_responses.put(event.encode())
+        elif event.startswith('+RRBDRES') and self._awaiting_response_for.startswith('AT+JRBD'):
             rev = event[9:9 + 12]
             mac = ':'.join('{:02X}'.format(ord(x)) for x in rev.decode('hex')[::-1])
             self.event_responses.put(mac)
-        elif event.startswith('+OK') and self._awaiting_response_for.startswith('AT'):
-            self.event_responses.put(event.encode())
         else:
             logging.warning('unhandled event: {!r}'.format(event))
 
     def command_with_event_response(self, command):
         """Send a command that responds with '+...' line"""
+        logging.debug("Sending command %s with response +..." % command)
         with self.lock:  # ensure that just one thread is sending commands at once
             self._awaiting_response_for = command
             self.transport.write(command.encode(self.ENCODING, self.UNICODE_HANDLING) + self.TERMINATOR)
@@ -53,11 +61,18 @@ class modemLora(ATProtocol):
     def ping(self):
         return self.command_with_event_response("AT")
 
+    def deviceVersion(self):
+        return self.command_with_event_response("AT+DEV?")
+
+    def firmwareVersion(self):
+        return self.command_with_event_response("AT+VER?")
+
 ### End class definition
 
 ### Main program
 if __name__ == '__main__':
     logging.basicConfig(filename='modemLora.log', level=logging.DEBUG)
+    logging.info("Started script for lora modem testing")
     ser = serial.Serial()
     ser.baudrate = 19200
     ser.port = '/dev/ttymxc3'
@@ -70,4 +85,6 @@ if __name__ == '__main__':
     ser.open() # Open serial port
     with serial.threaded.ReaderThread(ser, modemLora) as lora_module:
         print("Pinging modem: %s" % lora_module.ping())
+        print("Device version: %s" % lora_module.deviceVersion())
+        print("Firmware version: %s" % lora_module.firmwareVersion())
 ### End Main program

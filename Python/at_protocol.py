@@ -81,7 +81,8 @@ class ATProtocol(serial.threaded.LineReader):
         """
         Set an AT command and wait for the response.
         """
-        with self.lock:  # ensure that just one thread is sending commands at once
+        logging.debug("Sending command %s and wait for response" % command)
+        with self.lock:  # Ensure that just one thread is sending commands at once
             self.write_line(command)
             lines = []
             while True:
