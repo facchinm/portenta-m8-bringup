@@ -133,11 +133,11 @@ class modemLora(ATProtocol):
         return self.command_with_event_response("+JOIN", timeout)
 
     def joinOTAA(self, appEui, appKey, devEui=None):
-        print("Changing mode to %s: %s" % (self.loraMode.OTAA, self.changeMode(self.loraMode.OTAA))
-        print("Changing property %s to %s: %s" % ("APP_EUI", appEui, self.changeProperty("APP_EUI", appEui))
-        print("Changing property %s to %s: %s" % ("APP_KEY", appKey, self.changeProperty("APP_KEY", appKey))
+        print("Changing mode to %s: %s" % (self.loraMode.OTAA, self.changeMode("OTAA")))
+        print("Changing property %s to %s: %s" % ("APP_EUI", appEui, self.changeProperty("APP_EUI", appEui)))
+        print("Changing property %s to %s: %s" % ("APP_KEY", appKey, self.changeProperty("APP_KEY", appKey)))
         if devEui is not None:
-            print("Changing property %s to %s: %s" % ("DEV_EUI", devEui, self.changeProperty("DEV_EUI", devEui))
+            print("Changing property %s to %s: %s" % ("DEV_EUI", devEui, self.changeProperty("DEV_EUI", devEui)))
         self.join(60) # Timeout of 1 minute to connect
 
 ### End class definition
@@ -166,6 +166,6 @@ if __name__ == '__main__':
         print("Device version: %s" % lora_module.deviceVersion())
         print("Firmware version: %s" % lora_module.firmwareVersion())
         print("Device EUI: %s" % lora_module.deviceEUI())
-        print("Setting band %s: %s" % (str(band), lora_module.configureBand("EU868")))
+        print("Setting band %s: %s" % ("EU868", lora_module.configureBand("EU868")))
         lora_module.joinOTAA(SECRET_APP_EUI, SECRET_APP_KEY)
 ### End Main program
