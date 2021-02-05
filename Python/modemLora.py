@@ -30,12 +30,14 @@ class modemLora(ATProtocol):
 
     def handle_event(self, event):
         """Handle events and command responses starting with '+...'"""
-        if event.startswith('+OK') and self._awaiting_response_for.startswith('AT'):
+        if event.startswith('+OK') and self._awaiting_response_for.endswith('AT'):
             self.event_responses.put(event.encode())
         elif event.startswith('+OK=') and self._awaiting_response_for.startswith('AT+DEV?'):
-            self.event_responses.put(event.encode())
+            resp = event[4:4 + 7]
+            self.event_responses.put(resp.encode())
         elif event.startswith('+OK=') and self._awaiting_response_for.startswith('AT+VER?'):
-            self.event_responses.put(event.encode())
+            resp = event[4:4 + 5]
+            self.event_responses.put(resp.encode())
         elif event.startswith('+ERR'):
             logging.error("Modem error!")
             self.event_responses.put(event.encode())
