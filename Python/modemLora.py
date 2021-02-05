@@ -41,13 +41,13 @@ class modemLora(ATProtocol):
     }
 
     rfProperty = {
-        "APP_EUI": "+APPEUI=",
-        "APP_KEY": "+APPKEY=",
-        "DEV_EUI": "+DEVEUI=",
-        "DEV_ADDR": "+DEVADDR=",
-        "NWKS_KEY": "+NWKSKEY=",
-        "NWK_ID": "+IDNWK=",
-        "APPS_KEY": "+APPSKEY="
+        "APP_EUI": "AT+APPEUI=",
+        "APP_KEY": "AT+APPKEY=",
+        "DEV_EUI": "AT+DEVEUI=",
+        "DEV_ADDR": "AT+DEVADDR=",
+        "NWKS_KEY": "AT+NWKSKEY=",
+        "NWK_ID": "AT+IDNWK=",
+        "APPS_KEY": "AT+APPSKEY="
     }
 
     loraClass = {
@@ -118,22 +118,22 @@ class modemLora(ATProtocol):
         return self.command_with_event_response("AT+DEVEUI?")
 
     def configureBand(self, band):
-        value = self.loraBand(band)
-        return self.command_with_event_response("AT+BAND=" + value)
+        value = self.loraBand[band]
+        return self.command_with_event_response("AT+BAND=" + str(value))
 
     def changeMode(self, mode):
-        value = self.loraMode(mode)
-        return self.command_with_event_response("AT+MODE=" + mode)
+        value = self.loraMode[mode]
+        return self.command_with_event_response("AT+MODE=" + str(value))
 
     def changeProperty(self, what, value):
-        propertyCmd = self.rfProperty(what)
-        return self.command_with_event_response(propertyCmd + value)
+        propertyCmd = self.rfProperty[what]
+        return self.command_with_event_response(propertyCmd + str(value))
 
     def join(self, timeout):
-        return self.command_with_event_response("+JOIN", timeout)
+        return self.command_with_event_response("AT+JOIN", timeout)
 
     def joinOTAA(self, appEui, appKey, devEui=None):
-        print("Changing mode to %s: %s" % (self.loraMode.OTAA, self.changeMode("OTAA")))
+        print("Changing mode to %s: %s" % ("OTAA", self.changeMode("OTAA")))
         print("Changing property %s to %s: %s" % ("APP_EUI", appEui, self.changeProperty("APP_EUI", appEui)))
         print("Changing property %s to %s: %s" % ("APP_KEY", appKey, self.changeProperty("APP_KEY", appKey)))
         if devEui is not None:
