@@ -6,6 +6,8 @@ Example of a AT command protocol.
 https://en.wikipedia.org/wiki/Hayes_command_set
 http://www.itu.int/rec/T-REC-V.250-200307-I/en
 """
+# This is part of the library pyserial-3.4 examples
+# Modified by Massimo Pennazio maxipenna@libero.it 2021
 from __future__ import print_function
 
 import sys
