@@ -1,17 +1,21 @@
 # Portenta-M8 bring-up software
 
-## Usb gadget USB-C
+## Carrier Breakout
 
-## Video USB-C ANX7625
+## Carrier eNUC
 
-## Rs-232
+### Usb gadget USB-C
 
-## Rs-485
+### Video USB-C ANX7625
 
-### Half duplex
+### Rs-232
 
-### Full duplex
+### Rs-485
 
-## Modem Qualcomm LTE
+#### Half duplex
 
-## Modem Lora SMT32
+#### Full duplex
+
+### Modem Qualcomm LTE
+
+### Modem Lora SMT32
