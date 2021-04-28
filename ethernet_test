@@ -1,0 +1,14 @@
+#!/bin/bash
+
+echo "Connect an ethernet cable from board to a Pc,"
+echo "configure Pc with static IP 30.30.30.2/24"
+echo "and start iperf server with the following command:"
+echo "iperf3 -i 10 -s"
+
+echo "Configuring board with static IP 30.30.30.1/24"
+nmcli con mod "Wired connection 1" ipv4.addresses "30.30.30.1/24"
+nmcli con mod "Wired connection 1" ipv4.method manual
+nmcli con mod "Wired connection 1" connection.autoconnect yes
+
+echo "Starting iperf client"
+iperf3 -i 10 -t 60 -c 30.30.30.2
