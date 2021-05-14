@@ -16,6 +16,10 @@
 
 #### Full duplex
 
-### Modem Qualcomm LTE
+### Modem Sara-R4 LTE (Qualcomm)
 
-### Modem Lora SMT32
+### Modem Lora (SMT32)
+
+## Carrier Max
+
+### Modem Sara-R4 LTE (Qualcomm)
