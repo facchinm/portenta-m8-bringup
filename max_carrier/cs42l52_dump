@@ -1,0 +1,10 @@
+#!/bin/bash
+
+echo "Dump of cs42l52 registers"
+
+for (( i=1; i<=0x34; i++ ))
+do
+    res=$(i2cget -f -y 2 0x4a $i)
+    printf "%02x: %02x\n" $i $res
+    sleep 0.25
+done
