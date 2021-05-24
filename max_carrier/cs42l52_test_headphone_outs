@@ -1,0 +1,19 @@
+#!/bin/bash
+
+modprobe i2c-dev
+sleep 1
+
+echo "Enabling codec in master mode"
+i2cset -f -y 2 0x4a 0x06 0x80 # From this moment on you see SCLK, LRCK...
+sleep 0.25
+
+echo "Putting headphone outs always on"
+i2cset -f -y 2 0x4a 0x04 0xaf
+sleep 0.25
+
+echo "Putting headphone volume to 0dB"
+i2cset -f -y 2 0x4a 0x22 0x00
+sleep 0.25
+
+echo "Starting playback of sine @440Hz on LR channels"
+speaker-test -t sine -f 440 -c 2 -r 48000 -D hw:0,0
