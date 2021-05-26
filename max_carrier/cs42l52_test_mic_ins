@@ -3,15 +3,13 @@
 #modprobe i2c-dev
 #sleep 1
 
-echo "Putting headphone outs always on"
-i2cset -f -y 2 0x4a 0x04 0xaf
+echo "Enabling AIN3A AIN3B"
+i2cset -f -y 2 0x4a 0x08 0x40
+sleep 0.25
+i2cset -f -y 2 0x4a 0x09 0x40
 sleep 0.25
 
-echo "Putting headphone volume to 0dB"
-i2cset -f -y 2 0x4a 0x22 0x00
-sleep 0.25
-
-echo "Starting playback of sine @440Hz on LR channels in alternate mode"
+echo "Starting recording 30s of LR channels"
 #sr=8000
 #sr=16000
 #sr=32000
@@ -23,4 +21,4 @@ frmt=S16_LE
 #frmt=S24_LE # format not implemented in speaker-test utility
 #frmt=S32_LE # format not supported by codec driver
 echo "Format: $frmt"
-speaker-test -t sine -f 440 -F $frmt -c 2 -r $sr -D hw:0,0
+arecord --dump-hw-params -D hw:0,0 -t wav --max-file-time 30 -c 2 -r $sr -f $frmt --vumeter=stereo AIN3A_AIN3B_stereo_$frmt_$sr.wav
