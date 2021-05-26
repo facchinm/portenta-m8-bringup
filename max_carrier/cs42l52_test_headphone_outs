@@ -20,7 +20,7 @@ sr=48000
 #sr=96000
 echo "Sampling rate: $sr"
 frmt=S16_LE
-#frmt=S24_LE # format not implemented in speaker-test utility
+#frmt=S24_LE
 #frmt=S32_LE # format not supported by codec driver
 echo "Format: $frmt"
 speaker-test -t sine -f 440 -F $frmt -c 2 -r $sr -D hw:0,0
