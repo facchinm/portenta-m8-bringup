@@ -17,8 +17,9 @@ echo "Starting recording 30s of LR channels"
 sr=48000
 #sr=96000
 echo "Sampling rate: $sr"
+# Codec is sending always 24 bit whatever format is specified
 frmt=S16_LE
-#frmt=S24_LE # format not implemented in speaker-test utility
+#frmt=S24_LE # format is readed wrong from sai but i2s waveforms are correct
 #frmt=S32_LE # format not supported by codec driver
 echo "Format: $frmt"
 arecord --dump-hw-params -D hw:0,0 -t wav --max-file-time 30 -c 2 -r $sr -f $frmt --vumeter=stereo AIN3A_AIN3B_stereo_$frmt_$sr.wav
