@@ -2,7 +2,7 @@
 
 verbose=1
 fail=0
-clockVal=200000000
+clockVal=50000000
 
 echo ""
 echo "*************************START MANUFACTURING-TEST-SDCARD*************************"
