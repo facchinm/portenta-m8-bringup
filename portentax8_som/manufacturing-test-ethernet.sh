@@ -15,18 +15,18 @@ if [[ $1 == "-v" ]]; then
    let verbose=1
 fi
 
+# Wait for Serial command with the name of the test that needs to be executed
+read ethIp < /dev/ttymxc1
+
 if [ $verbose == 1 ]; then  
-  echo "Configuring board with static IP 30.30.30.1/24"
+  echo "Received IP $ethIp"
 fi
-nmcli con mod "Wired connection 1" ipv4.addresses "30.30.30.1/24"
-nmcli con mod "Wired connection 1" ipv4.method manual
-nmcli con mod "Wired connection 1" connection.autoconnect yes
 
 if [ $verbose == 1 ]; then  
   echo "Starting iperf client"
 fi
 
-iperf3 -i 10 -t 60 -c $NANOPI_IP
+ping -c 3 $ethIp
 ret="$(echo $?)"
 if [ ret != "0" ]; then
   let fail=1
