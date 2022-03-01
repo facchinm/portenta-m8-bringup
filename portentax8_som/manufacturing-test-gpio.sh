@@ -94,6 +94,7 @@ for n in ${allPins[@]}; do
    fi
    i2cset -f -y 2 $DTTADDRESS $I2CREADPINS c
    wait_ok
+   echo 1 > /sys/class/gpio/gpio$n/value
 done
 
 # Unexport the gpios
