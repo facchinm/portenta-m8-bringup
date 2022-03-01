@@ -29,6 +29,7 @@ if [[ $2 == "-all" ]]; then
 fi
 
 # Run tests
+echo READY > /dev/ttymxc1
 
 while true
 do
@@ -59,6 +60,8 @@ do
 
   # Write test result to Serial
   echo $testName:$result > /dev/ttymxc1
+  echo EndOfTest > /dev/ttymxc1
+  echo  > /dev/ttymxc1
 
   sleep .1
 done
