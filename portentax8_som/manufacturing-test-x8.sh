@@ -30,8 +30,12 @@ fi
 
 # Run tests
 
-# Drive all the pins HIGH
-for testName in ${x8Tests[@]}; do
+while true
+do
+  result="KO"
+
+  # Wait for Serial command with the name of the test that needs to be executed
+  read testName < /dev/ttymxc1
 
   if [ $verbose == 1 ]; then  
     echo "Run $testName test"
@@ -47,12 +51,18 @@ for testName in ${x8Tests[@]}; do
   if [ $ret == "0" ]; then
     echo "$testName test passed :)"
     let pass=pass+1
+    result="OK"
   else
     echo "$testName test failed :("
-    let fail=fail+1
+    let fail=fail+11
   fi
 
+  # Write test result to Serial
+  echo $testName:$result > /dev/ttymxc1
+
+  sleep .1
 done
+
 
 echo "X8 test report:"
 echo "$pass test passed"
