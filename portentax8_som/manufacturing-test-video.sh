@@ -12,15 +12,6 @@ if [[ $1 == "-v" ]]; then
    let verbose=1
 fi
 
-if [ $verbose == 1 ]; then  
-  echo "Checking if the WiFi driver is active..."
-fi
-
-# Send I2C command I2C_READ_VIDEO (0x0D) to tell the son to enable the frame grabber
-if [ $verbose == 1 ]; then
-   echo "Sending command to enable frame grabber..."
-fi
-
 # Send the RGB frame
 echo 0 > /sys/class/graphics/fbcon/cursor_blink
 cat /unit_tests/Display/testcard-1920x1080-bgra.rgb > /dev/fb0
