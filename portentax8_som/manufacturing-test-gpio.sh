@@ -2,8 +2,6 @@
 
 verbose=0
 fail=0
-gpio5_val_hex=0
-gpio5_dr_hex=0
 
 echo ""
 echo "*************************START MANUFACTURING-TEST-GPIO*************************"
@@ -24,40 +22,6 @@ wait_ok () {
    fi
    if [[ $var == "0x4b4f" ]] & [ $verbose == 1 ]; then
       echo "OK :)"
-   fi
-}
-
-
-setSpiPinsAsOutput() {
-   gpio5_dr=$(/unit_tests/memtool -32 30240004 1 | grep '0x30240004:'| awk -v col=2 '{print $col}')
-   if [ $verbose == 1 ]; then
-      echo "GPIO5 DR: $gpio5_dr"
-   fi
-   gpio5_dr="$(( 0x$gpio5_dr | 0x3300 ))"
-   if [ $verbose == 1 ]; then
-      echo "GPIO5 DR after mask: $gpio5_dr"
-   fi
-   gpio5_dr_hex=$(printf "%x\n" $gpio5_dr)
-   if [ $verbose == 1 ]; then
-      echo "GPIO5 DR HEX after mask: $gpio5_dr_hex"
-   fi
-   # Set pins HIGH
-   /unit_tests/memtool -32 30240004=0x$gpio5_dr_hex
-}
-
-readSpiPins() {
-   gpio5_val_hex=$(/unit_tests/memtool -32 30240000 1 | grep '0x30240000:'| awk -v col=2 '{print $col}')
-   if [ $verbose == 1 ]; then
-      echo "GPIO5: $gpio5_val_hex"
-   fi
-}
-
-setSpiPinsHigh() {
-   readSpiPins
-   gpio5_val="$(( 0x$gpio5_val_hex | 0x3300 ))"
-   gpio5_val_hex=$(printf "%x\n" $gpio5_val)
-   if [ $verbose == 1 ]; then
-      echo "GPIO5 with SPI pins HIGH: $gpio5_val_hex"
    fi
 }
 
@@ -90,7 +54,7 @@ I2CREADPINS=0x0A
 I2CALLINPUT=0x0B
 I2CCLEARCOUNTERS=0x0C
 
-allPins=(84 85 86 87 88 106 107 108 109 131 132 134 135 138 139 144 145 148 149 156 157 160 161 162 163 164 165 166 169 170 171 172 173 174 175 176 177 178 179 180 181 182 183 184 185 186 187 188 189 190 191 192)
+allPins=(84 85 86 87 88 106 107 108 109 131 132 134 135 136 138 139 140 144 145 148 149 156 157 160 161 162 163 164 165 166 169 170 171 172 173 174 175 176 177 178 179 180 181 182 183 184 185 186 187 188 189 190 191 192)
 
 # Send I2C command I2C_ALL_INPUT (0x0B) to tell the son to put all the pins in INPUT and wait OK
 if [ $verbose == 1 ]; then
@@ -106,6 +70,28 @@ fi
 i2cset -f -y 2 $DTTADDRESS $I2CCLEARCOUNTERS c
 wait_ok
 
+# Reset IOMUX configuration for SPI1 pins
+# 0x303301F4 = IOMUXC_SW_MUX_CTL_PAD_ECSPI1_SCLK
+/unit_tests/memtool -32 303301F4=00000005
+# 0x303301F8 = IOMUXC_SW_MUX_CTL_PAD_ECSPI1_MOSI
+/unit_tests/memtool -32 303301F8=00000005
+# 0x303301FC = IOMUXC_SW_MUX_CTL_PAD_ECSPI1_MISO
+/unit_tests/memtool -32 303301FC=00000005
+
+# Reset IOMUX configuration for SPI2 pins
+# 0x30330204 = IOMUXC_SW_MUX_CTL_PAD_ECSPI2_SCLK
+/unit_tests/memtool -32 30330204=00000005
+# 0x30330208 = IOMUXC_SW_MUX_CTL_PAD_ECSPI2_MOSI
+/unit_tests/memtool -32 30330208=00000005
+# 0x3033020C = IOMUXC_SW_MUX_CTL_PAD_ECSPI2_MISO
+/unit_tests/memtool -32 3033020C=00000005
+
+# Reset IOMUX configuration for I2C4 pins
+# 0x3033022C = IOMUXC_SW_MUX_CTL_PAD_I2C4_SCL
+/unit_tests/memtool -32 3033022C=0x00000005
+# 0x30330230 = IOMUXC_SW_MUX_CTL_PAD_I2C4_SDA
+/unit_tests/memtool -32 30330230=0x00000005
+
 # Drive all the pins HIGH
 for n in ${allPins[@]}; do
    if [ $verbose == 1 ]; then
@@ -119,15 +105,6 @@ done
 if [ $verbose == 1 ]; then
    echo "Configuring SPI pins with memtool..."
 fi
-
-# Set as OUTPUT
-#  - GPIO5_IO8  (SPI1_MISO)
-#  - GPIO5_IO9  (SPI1_SS)
-#  - GPIO5_IO12 (SPI2_MISO)
-#  - GPIO5_IO13 (SPI2_SS)
-setSpiPinsAsOutput
-
-setSpiPinsHigh
 
 # Set pins LOW, one at a time
 for n in ${allPins[@]}; do
@@ -145,57 +122,6 @@ for n in ${allPins[@]}; do
    wait_ok
    echo 1 > /sys/class/gpio/gpio$n/value
 done
-
-# Set GPIO5_IO8 (SPI1_MISO) LOW
-regVal="$(( 0x$gpio5_val_hex & 0xFFFFFEFF ))"
-regVal_hex=$(printf "%x\n" $regVal)
-/unit_tests/memtool -32 30240000=0x$regVal_hex
-# Send I2C command I2C_READ_PINS to tell the son to to read all the sons' pins and wait OK
-if [ $verbose == 1 ]; then
-   echo "Sending command to read pins status..."
-fi
-i2cset -f -y 2 $DTTADDRESS $I2CREADPINS c
-wait_ok
-/unit_tests/memtool -32 30240000=0x$gpio5_val_hex
-
-# Set GPIO5_IO9 (SPI1_SS) LOW
-regVal="$(( 0x$gpio5_dr_hex & 0xFFFFFDFF ))"
-regVal_hex=$(printf "%x\n" $regVal)
-/unit_tests/memtool -32 30240000=0x$regVal_hex
-# Send I2C command I2C_READ_PINS to tell the son to to read all the sons' pins and wait OK
-if [ $verbose == 1 ]; then
-   echo "Sending command to read pins status..."
-fi
-i2cset -f -y 2 $DTTADDRESS $I2CREADPINS c
-wait_ok
-/unit_tests/memtool -32 30240000=0x$gpio5_dr_hex
-
-# Set GPIO5_IO12 (SPI2_MISO) LOW
-regVal="$(( 0x$gpio5_dr_hex & 0xFFFFEFFF ))"
-regVal_hex=$(printf "%x\n" $regVal)
-/unit_tests/memtool -32 30240000=0x$regVal_hex
-# Send I2C command I2C_READ_PINS to tell the son to to read all the sons' pins and wait OK
-if [ $verbose == 1 ]; then
-   echo "Sending command to read pins status..."
-fi
-i2cset -f -y 2 $DTTADDRESS $I2CREADPINS c
-wait_ok
-/unit_tests/memtool -32 30240000=0x$gpio5_dr_hex
-
-# Set GPIO5_IO13 (SPI2_SS) LOW
-regVal="$(( 0x$gpio5_dr_hex & 0xFFFFDFFF ))"
-regVal_hex=$(printf "%x\n" $regVal)
-/unit_tests/memtool -32 30240000=0x$regVal_hex
-# Send I2C command I2C_READ_PINS to tell the son to to read all the sons' pins and wait OK
-if [ $verbose == 1 ]; then
-   echo "Sending command to read pins status..."
-fi
-i2cset -f -y 2 $DTTADDRESS $I2CREADPINS c
-wait_ok
-
-# Restore originale GPIO5_DR
-/unit_tests/memtool -32 30240004=0x$gpio5_dr_hex
-
 
 # Unexport the gpios
 if [ $verbose == 1 ]; then
