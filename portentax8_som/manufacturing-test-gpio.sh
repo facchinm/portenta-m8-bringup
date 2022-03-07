@@ -61,6 +61,7 @@ if [ $verbose == 1 ]; then
    echo "Sending command to set all pins in input..."
 fi
 i2cset -f -y 2 $DTTADDRESS $I2CALLINPUT c
+sleep 0.1
 wait_ok
 
 # Send I2C command I2C_CLEAR_COUNTERS (0x0C) to tell the son to reset the transitions counters and wait OK
@@ -68,6 +69,7 @@ if [ $verbose == 1 ]; then
    echo "Sending command to clear all counters..."
 fi
 i2cset -f -y 2 $DTTADDRESS $I2CCLEARCOUNTERS c
+sleep 0.1
 wait_ok
 
 # Reset IOMUX configuration for SPI1 pins
@@ -119,6 +121,7 @@ for n in ${allPins[@]}; do
       echo "Sending command to read pins status..."
    fi
    i2cset -f -y 2 $DTTADDRESS $I2CREADPINS c
+   sleep 0.1
    wait_ok
    echo 1 > /sys/class/gpio/gpio$n/value
 done
