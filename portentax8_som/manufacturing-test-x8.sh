@@ -30,6 +30,8 @@ fi
 
 # Run tests
 echo READY > /dev/ttymxc1
+echo EndOfTest > /dev/ttymxc1
+echo "" > /dev/ttymxc1
 
 while true
 do
