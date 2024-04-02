@@ -29,9 +29,10 @@ if [[ $2 == "-all" ]]; then
 fi
 
 # Run tests
-echo READY > /dev/ttymxc1
-echo EndOfTest > /dev/ttymxc1
-echo "" > /dev/ttymxc1
+echo  > /dev/ttymxc1
+echo "READY:OK" > /dev/ttymxc1
+echo "EndOfTest" > /dev/ttymxc1
+echo  > /dev/ttymxc1
 
 while true
 do
@@ -60,7 +61,6 @@ do
     let fail=fail+11
   fi
 
-  # Write test result to Serial
   echo $testName:$result > /dev/ttymxc1
   echo EndOfTest > /dev/ttymxc1
   echo  > /dev/ttymxc1

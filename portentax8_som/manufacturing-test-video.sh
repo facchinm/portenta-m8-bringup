@@ -11,6 +11,33 @@ if [[ $1 == "-v" ]]; then
    echo "Verbose mode"
    let verbose=1
 fi
+echo 109 > /sys/class/gpio/export
+echo out > /sys/class/gpio/gpio109/direction
+echo 1 > /sys/class/gpio/gpio109/value
+sleep 1
+echo 0 > /sys/class/gpio/gpio109/value
+
+TIMEOUT_SEC=10
+start_time="$(date -u +%s)"
+
+while [ ! -c  /dev/fb0 ]; do
+echo no fb0
+sleep 1
+current_time="$(date -u +%s)"
+elapsed_seconds=$(($current_time-$start_time))
+if [ $elapsed_seconds -gt $TIMEOUT_SEC ]; then
+  TIMEOUT_SEC=20
+  echo "Retrying to turn on the video"
+  echo 109 > /sys/class/gpio/export                                                      
+  echo out > /sys/class/gpio/gpio109/direction
+  echo 1 > /sys/class/gpio/gpio109/value      
+  sleep 1                                     
+  echo 0 > /sys/class/gpio/gpio109/value      
+fi
+done
+
+#echo video:OK > /dev/ttymxc1
+#echo EndOfTest > /dev/ttymxc1
 
 # Send the RGB frame
 echo 0 > /sys/class/graphics/fbcon/cursor_blink

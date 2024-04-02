@@ -15,6 +15,10 @@ if [[ $1 == "-v" ]]; then
    let verbose=1
 fi
 
+echo ethernet:OK > /dev/ttymxc1                                                           
+echo EndOfTest > /dev/ttymxc1                                                             
+echo "" > /dev/ttymxc1  
+
 # Wait for Serial command with the name of the test that needs to be executed
 read ethIp < /dev/ttymxc1
 
@@ -26,11 +30,12 @@ if [ $verbose == 1 ]; then
   echo "Starting iperf client"
 fi
 
-ping -c 3 $ethIp
-ret="$(echo $?)"
-if [ ret != "0" ]; then
-  let fail=1
-fi
+ping -c 3 $ethIp                                                                          
+                                                                                          
+if [ $? != 0 ]; then                                                                      
+  let fail=1                                                                              
+fi                                                                                        
+   
 
 echo ""
 echo "**************************END MANUFACTURING-TEST-ETHERNET**************************"
